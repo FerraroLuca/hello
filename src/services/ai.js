@@ -1,34 +1,34 @@
-import { GoogleGenAI, SchemaType } from "@google/genai";
+import { GoogleGenAI } from "@google/generative-ai"; // Import corretto
 
-// Recupera la chiave dalle variabili d'ambiente (Vite usa import.meta.env)
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Nota: Ho cambiato il nome per corrispondere a quello che vedo nei tuoi log di Netlify
+const API_KEY = import.meta.env.VITE_GEMINI_KEY; 
 
-if (!API_KEY) {
-  console.error("VITE_GEMINI_API_KEY mancante nel file .env");
+let client = null;
+if (API_KEY) {
+  client = new GoogleGenAI(API_KEY);
 }
 
-const client = new GoogleGenAI({ apiKey: API_KEY });
-
+// Definiamo lo schema usando stringhe dirette, che è più stabile tra le versioni
 const gameSchema = {
-  type: SchemaType.OBJECT,
+  type: "object",
   properties: {
-    narrative: { type: SchemaType.STRING, description: "La parte narrativa della storia..." },
+    narrative: { type: "string" },
     stats: {
-      type: SchemaType.OBJECT,
+      type: "object",
       properties: {
-        hp: { type: SchemaType.INTEGER },
-        maxHp: { type: SchemaType.INTEGER },
-        level: { type: SchemaType.INTEGER },
-        inventory: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-        location: { type: SchemaType.STRING },
-        class: { type: SchemaType.STRING }
+        hp: { type: "integer" },
+        maxHp: { type: "integer" },
+        level: { type: "integer" },
+        inventory: { type: "array", items: { type: "string" } },
+        location: { type: "string" },
+        class: { type: "string" }
       },
       required: ["hp", "maxHp", "level", "inventory", "location", "class"]
     },
-    isGameOver: { type: SchemaType.BOOLEAN },
-    gameOverReason: { type: SchemaType.STRING },
-    isVictory: { type: SchemaType.BOOLEAN },
-    victoryReason: { type: SchemaType.STRING }
+    isGameOver: { type: "boolean" },
+    gameOverReason: { type: "string" },
+    isVictory: { type: "boolean" },
+    victoryReason: { type: "string" }
   },
   required: ["narrative", "stats", "isGameOver", "isVictory"]
 };
