@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Regola di redirect per supportare il routing lato client (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
