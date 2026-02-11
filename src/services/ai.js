@@ -1,27 +1,21 @@
-import { GoogleGenAI } from "@google/generative-ai";
+// Usiamo l'importazione specifica per il web se disponibile
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = import.meta.env.VITE_GEMINI_KEY;
 
-// Funzione di utilità per inizializzare l'AI solo quando serve
-const getGenAI = () => {
-  if (!API_KEY) {
-    console.error("ERRORE: VITE_GEMINI_KEY non trovata!");
-    return null;
-  }
-  
-  try {
-    // Verifichiamo se GoogleGenAI esiste prima di usarlo come costruttore
-    if (typeof GoogleGenAI !== 'undefined') {
-      return new GoogleGenAI(API_KEY);
-    } else {
-      console.error("GoogleGenAI è undefined. Errore di importazione.");
-      return null;
-    }
-  } catch (e) {
-    console.error("Errore durante l'inizializzazione di GoogleGenAI:", e);
-    return null;
-  }
-};
+// Verifichiamo se la classe esiste prima di usarla
+let genAI = null;
 
-const genAI = getGenAI();
+if (API_KEY) {
+  try {
+    // Nota: La classe si chiama spesso GoogleGenerativeAI, non GoogleGenAI
+    genAI = new GoogleGenerativeAI(API_KEY);
+    console.log("AI Inizializzata correttamente");
+  } catch (e) {
+    console.error("Errore inizializzazione AI:", e);
+  }
+} else {
+  console.error("Chiave API mancante! Controlla VITE_GEMINI_KEY su Netlify.");
+}
+
 export default genAI;
