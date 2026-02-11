@@ -1,31 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Configurazione Iniziale
+// 1. Recupero Chiave
 const API_KEY = import.meta.env.VITE_GEMINI_KEY;
 
-// Specifichiamo la versione API "v1" per evitare il 404 della v1beta
+// 2. Inizializzazione Client
 const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
-// Inizializzazione del modello 1.5 Flash
+// 3. Inizializzazione Modello (Usiamo solo il nome del modello senza fronzoli)
 const model = genAI ? genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash",
+  model: "gemini-1.5-flash" 
 }) : null;
 
 /**
- * Funzione per pulire la risposta e convertirla in JSON
+ * Funzione di utilità per pulire e validare il JSON
  */
-function parseGeminiResponse(responseText) {
+function parseResponse(text) {
   try {
-    const cleanText = responseText
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
     return JSON.parse(cleanText);
   } catch (e) {
-    console.error("Errore parsing JSON:", e, "Testo:", responseText);
-    // Ritorna un oggetto di fallback per non crashare l'app
+    console.error("Errore parsing:", e);
     return {
-      narrative: "L'oracolo ha parlato in modo confuso... (Errore nei dati)",
+      narrative: "L'oscurità avvolge i tuoi sensi... (Errore di generazione)",
       stats: { hp: 100, maxHp: 100, level: 1, inventory: [], location: "Limbo", class: "Eroe" },
       isGameOver: false, isVictory: false
     };
@@ -33,15 +29,14 @@ function parseGeminiResponse(responseText) {
 }
 
 export async function initGame(theme) {
-  if (!model) throw new Error("API Key mancante su Netlify");
-
+  if (!model) throw new Error("API Key mancante");
+  
   const prompt = `Sei un Master GDR. Inizia avventura tema ${theme}. 
-  Rispondi SOLO in JSON: {"narrative": "...", "stats": {"hp":100, "maxHp":100, "level":1, "inventory":[], "location":"Inizio", "class":"Viandante"}, "isGameOver":false, "isVictory":false}`;
+  Rispondi SOLO JSON: {"narrative": "...", "stats": {"hp":100, "maxHp":100, "level":1, "inventory":[], "location":"Inizio", "class":"Viandante"}, "isGameOver":false, "isVictory":false}`;
 
   try {
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    return parseGeminiResponse(text);
+    return parseResponse(result.response.text());
   } catch (error) {
     console.error("Dettaglio Errore Google:", error);
     throw error;
@@ -51,12 +46,11 @@ export async function initGame(theme) {
 export async function sendAction(actionText) {
   if (!model) throw new Error("API Key mancante");
 
-  const prompt = `Il giocatore fa: ${actionText}. Continua la storia. Rispondi SOLO JSON con struttura identica alla precedente.`;
+  const prompt = `Il giocatore fa: ${actionText}. Continua la storia. Rispondi SOLO JSON con stessa struttura.`;
 
   try {
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    return parseGeminiResponse(text);
+    return parseResponse(result.response.text());
   } catch (error) {
     console.error("Dettaglio Errore Google:", error);
     throw error;
