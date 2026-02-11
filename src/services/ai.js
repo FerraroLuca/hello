@@ -1,11 +1,14 @@
-import { GoogleGenAI } from "@google/generative-ai"; // Import corretto
+import * as GoogleGenerativeAI from "@google/generative-ai";
 
-// Nota: Ho cambiato il nome per corrispondere a quello che vedo nei tuoi log di Netlify
-const API_KEY = import.meta.env.VITE_GEMINI_KEY; 
+// Recupera la chiave dalle variabili d'ambiente (Vite usa import.meta.env)
+const API_KEY = import.meta.env.VITE_GEMINI_KEY;
 
 let client = null;
 if (API_KEY) {
-  client = new GoogleGenAI(API_KEY);
+  // Accediamo alla classe tramite l'oggetto che abbiamo importato sopra
+  client = new GoogleGenerativeAI.GoogleGenAI(API_KEY);
+} else {
+  console.warn("VITE_GEMINI_KEY mancante nelle variabili d'ambiente.");
 }
 
 // Definiamo lo schema usando stringhe dirette, che è più stabile tra le versioni
